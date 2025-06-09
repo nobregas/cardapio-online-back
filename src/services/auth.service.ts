@@ -57,12 +57,55 @@ class AuthService {
       );
     }
 
-    const phoneRegex = /^\+?[1-9]\d{1,14}$/;
+    const phoneRegex = /^\d{2}9\d{8}$/;
     if (!phoneRegex.test(phone)) {
       throw new BadRequest(ErrorMessage.INVALID_PHONE, ErrorCode.INVALID_PHONE);
     }
 
-    const existingUser = await User.find({ email });
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      throw new BadRequest(
+        ErrorMessage.USER_ALREADY_EXISTS,
+        ErrorCode.USER_ALREADY_EXISTS
+      );
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = await User.create({
+      name: name,
+      email: email,
+      password: hashedPassword,
+      phone: phone,
+      role: UserRole.CUSTOMER,
+    });
+
+    const { password: _, ...userWithoutPassword } = newUser.toObject();
+    return userWithoutPassword;
+  }
+
+  async register_owner(userData: RegisterDTO) {
+    const { name, email, password, phone } = userData;
+
+    if (!name || !email || !password || !phone) {
+      throw new BadRequest(
+        ErrorMessage.VALIDATION_ERROR,
+        ErrorCode.VALIDATION_ERROR
+      );
+    }
+
+    if (password.length < 8) {
+      throw new BadRequest(
+        ErrorMessage.INVALID_PASSWORD,
+        ErrorCode.INVALID_PASSWORD
+      );
+    }
+
+    const phoneRegex = /^\d{2}9\d{8}$/;
+    if (!phoneRegex.test(phone)) {
+      throw new BadRequest(ErrorMessage.INVALID_PHONE, ErrorCode.INVALID_PHONE);
+    }
+
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       throw new BadRequest(
         ErrorMessage.USER_ALREADY_EXISTS,
@@ -94,7 +137,7 @@ class AuthService {
     }
   }
 
-  resetPassword() {}
+  async resetPassword() {}
 
   async refreshToken(userID: string) {
     try {

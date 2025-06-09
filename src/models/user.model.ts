@@ -1,5 +1,6 @@
 import { Document, model, Schema } from "mongoose";
 import { UserRole } from "./enums/roles";
+import { IRestaurant } from "./restaurant.model";
 
 export interface IUser extends Document {
   email: string;
@@ -8,6 +9,7 @@ export interface IUser extends Document {
   name: string;
   refreshToken?: string;
   phone?: string;
+  restaurant?: IRestaurant["_id"];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -41,9 +43,15 @@ const userSchema = new Schema<IUser>(
       type: String,
       trim: true,
       match: [
-        /^\+?[1-9]\d{1,14}$/,
+        /^\d{2}9\d{8}$/,
         "Por favor, insira um número de telefone válido.",
       ],
+    },
+    restaurant: {
+      type: Schema.Types.ObjectId,
+      ref: "Restaurant",
+      default: null,
+      required: false,
     },
     refreshToken: {
       type: String,

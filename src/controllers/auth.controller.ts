@@ -14,6 +14,17 @@ class AuthController {
       next(error);
     }
   }
+
+  async register_owner(req: Request, res: Response, next: NextFunction) {
+    try {
+      const newUser = await authService.register_owner(req.body);
+
+      res.status(HttpStatus.CREATED).json(newUser);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async login(req: Request, res: Response, next: NextFunction) {
     try {
       const token = await authService.login(req.body);
