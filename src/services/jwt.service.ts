@@ -1,8 +1,6 @@
 import { SignOptions } from "jsonwebtoken";
 import jwt from "jsonwebtoken";
-
-const JWT_SECRET = process.env.JWT_SECRET || "SECRET";
-const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || "SECRET";
+import { JWT_SECRET, REFRESH_TOKEN_SECRET } from "../secrets";
 
 class JwtService {
   generateToken(payload: any) {

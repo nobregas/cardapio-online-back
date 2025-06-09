@@ -1,11 +1,8 @@
 import express, { Application, Request, Response } from "express";
-import dotenv from "dotenv";
 import cors from "cors";
 import helmet from "helmet";
 import router from "./routes/routes";
 import errorMiddleware from "./middleware/errorMiddleware";
-
-dotenv.config();
 
 const app: Application = express();
 
@@ -18,9 +15,7 @@ app.use("/api", router);
 app.use(errorMiddleware);
 
 app.get("/", (req: Request, res: Response) => {
-    res.json({ message: "Application is healthy" });
+  res.json({ message: "Application is healthy" });
 });
-
-
 
 export default app;
