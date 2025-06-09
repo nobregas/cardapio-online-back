@@ -2,8 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import { ErrorCode, ErrorMessage } from "../enums";
 import { UnauthorizedException } from "../exceptions/UnauthorizedEXception";
 import * as jwt from "jsonwebtoken";
-import { IDecodedToken } from "../types";
 import User from "../models/user.model";
+import { IDecodedToken } from "../../@types/express";
 
 const JWT_SECRET = process.env.JWT_SECRET || "SECRET";
 

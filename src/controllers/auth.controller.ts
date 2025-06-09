@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { HttpStatus } from "../enums";
 import authService from "../services/auth.service";
+import { UnauthorizedException } from "../exceptions/UnauthorizedEXception";
+import { ErrorCode, ErrorMessage } from "../enums";
 
 class AuthController {
   async register(req: Request, res: Response, next: NextFunction) {
@@ -22,10 +24,29 @@ class AuthController {
   }
 
   async logout(req: Request, res: Response, next: NextFunction) {
-    const user = req.user.id;
+    const userID = req.user?.id;
+    try {
+      if (!userID) {
+        throw new UnauthorizedException(
+          ErrorMessage.MISSING_OR_INVALID_TOKEN,
+          ErrorCode.MISSING_OR_INVALID_TOKEN
+        );
+      }
+      await authService.logout(userID as string);
+      res.status(HttpStatus.OK).json({ message: "Logout successful" });
+    } catch (error) {
+      next(error);
+    }
   }
 
-  async refreshToken() {}
+  async refreshToken(req: Request, res: Response, next: NextFunction) {
+    try {
+      const token = await authService.refreshToken(req.user?.id as string);
+      res.json(token);
+    } catch (error) {
+      next(error);
+    }
+  }
 
   async forgotPassword() {}
 }

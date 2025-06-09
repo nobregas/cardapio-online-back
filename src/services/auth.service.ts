@@ -3,15 +3,10 @@ import { LoginDTO } from "../dtos/auth/LoginDTO";
 import { ErrorCode, ErrorMessage } from "../enums";
 import { BadRequest } from "../exceptions/BadRequest";
 import User from "../models/user.model";
-import * as jwt from "jsonwebtoken";
-import { SignOptions } from "jsonwebtoken";
 import { RegisterDTO } from "../dtos/auth/RegisterDTO";
 import { UserRole } from "../models/enums/roles";
-
-const JWT_SECRET = process.env.JWT_SECRET || "SECRET";
-const TOKEN_DURATION = process.env.TOKEN_DURATION || 86400;
-const REFRESH_TOKEN_DURATION = 999999;
-const REFRESH_TOKEN_SECRET = "SECRETT";
+import { InternalException } from "../exceptions/InternalException";
+import jwtService from "./jwt.service";
 
 class AuthService {
   async login(credentials: LoginDTO): Promise<string> {
@@ -35,22 +30,8 @@ class AuthService {
     }
 
     const payload = { id: user._id };
-    const signOptions: SignOptions = {
-      expiresIn: 86400,
-      algorithm: "HS256",
-    };
-
-    const refreshSignOptions: SignOptions = {
-      expiresIn: REFRESH_TOKEN_DURATION,
-      algorithm: "HS256",
-    };
-
-    const token = jwt.sign(payload, JWT_SECRET, signOptions);
-    const refreshToken = jwt.sign(
-      payload,
-      REFRESH_TOKEN_SECRET,
-      refreshSignOptions
-    );
+    const token = jwtService.generateToken(payload);
+    const refreshToken = jwtService.generateRefreshToken(payload);
 
     user.refreshToken = refreshToken;
 
@@ -103,12 +84,45 @@ class AuthService {
   }
 
   async logout(userID: string) {
-    await User.findByIdAndUpdate(userID, { refreshToken: null });
+    try {
+      await User.findByIdAndUpdate(userID, { refreshToken: null });
+    } catch (error) {
+      throw new InternalException(
+        ErrorMessage.SOMETHING_WENT_WRONG,
+        ErrorCode.SOMETHING_WENT_WRONG
+      );
+    }
   }
 
   resetPassword() {}
 
-  refreshToken() {}
+  async refreshToken(userID: string) {
+    try {
+      const user = await User.findById(userID);
+      if (!user) {
+        throw new BadRequest(
+          ErrorMessage.USER_NOT_FOUND,
+          ErrorCode.USER_NOT_FOUND
+        );
+      }
+
+      const payload = { id: user._id };
+
+      const token = jwtService.generateToken(payload);
+      const refreshToken = jwtService.generateRefreshToken(payload);
+
+      user.refreshToken = refreshToken;
+
+      await user.save();
+
+      return token;
+    } catch (error) {
+      throw new InternalException(
+        ErrorMessage.SOMETHING_WENT_WRONG,
+        ErrorCode.SOMETHING_WENT_WRONG
+      );
+    }
+  }
 }
 
 export default new AuthService();
