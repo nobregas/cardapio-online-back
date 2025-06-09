@@ -38,4 +38,5 @@ export enum ErrorMessage {
   INVALID_PHONE = "Invalid phone number format",
   MISSING_OR_INVALID_TOKEN = "Missing or invalid token",
   TOKEN_EXPIRED = "Token expired",
+  UNAUTHORIZED = "Unauthorized",
 }
