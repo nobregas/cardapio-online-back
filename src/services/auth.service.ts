@@ -122,8 +122,10 @@ class AuthService {
       role: UserRole.OWNER,
     });
 
+    const token = await this.login({ email, password });
+
     const { password: _, ...userWithoutPassword } = newUser.toObject();
-    return userWithoutPassword;
+    return { ...userWithoutPassword, token };
   }
 
   async logout(userID: string) {
