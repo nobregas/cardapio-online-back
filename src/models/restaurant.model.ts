@@ -13,6 +13,7 @@ export interface IRestaurant extends Document {
   };
   description: string;
   phone: string;
+  ownerId: Schema.Types.ObjectId;
 }
 
 const restaurantSchema = new Schema<IRestaurant>(
@@ -63,6 +64,11 @@ const restaurantSchema = new Schema<IRestaurant>(
       type: String,
       trim: true,
       required: [true, "O telefone do restaurante é obrigatório."],
+    },
+    ownerId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: [true, "O proprietário do restaurante é obrigatório."],
     },
   },
   {

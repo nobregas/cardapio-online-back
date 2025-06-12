@@ -1,0 +1,62 @@
+import { NextFunction, Request, Response } from "express";
+import { HttpStatus } from "../enums";
+import { CreateRestaurantDTO } from "../dtos/restaurant/CreateRestaurantDTO";
+import { UpdateRestaurantDTO } from "../dtos/restaurant/UpdateRestaurant.DTO";
+import restaurantService from "../services/restaurant.service";
+
+class RestaurantController {
+  async create(req: Request, res: Response, next: NextFunction) {
+    try {
+      const restaurantData: CreateRestaurantDTO = req.body;
+      const newRestaurant = await restaurantService.create(
+        restaurantData,
+        req.user?.id as string
+      );
+      res.status(HttpStatus.CREATED).json(newRestaurant);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getAll(req: Request, res: Response, next: NextFunction) {
+    try {
+      const restaurants = await restaurantService.findAll();
+      res.status(HttpStatus.OK).json(restaurants);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getById(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const restaurant = await restaurantService.findById(id);
+      res.status(HttpStatus.OK).json(restaurant);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async update(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const updateData: UpdateRestaurantDTO = req.body;
+      const updatedRestaurant = await restaurantService.update(id, updateData);
+      res.status(HttpStatus.OK).json(updatedRestaurant);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async delete(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      await restaurantService.delete(id);
+      res.status(HttpStatus.NO_CONTENT).send();
+    } catch (error) {
+      next(error);
+    }
+  }
+}
+
+export default new RestaurantController();
