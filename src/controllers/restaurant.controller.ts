@@ -8,9 +8,10 @@ class RestaurantController {
   async create(req: Request, res: Response, next: NextFunction) {
     try {
       const restaurantData: CreateRestaurantDTO = req.body;
+      const ownerId = req.user?.id as string;
       const newRestaurant = await restaurantService.create(
         restaurantData,
-        req.user?.id as string
+        ownerId
       );
       res.status(HttpStatus.CREATED).json(newRestaurant);
     } catch (error) {
@@ -32,6 +33,16 @@ class RestaurantController {
       const { id } = req.params;
       const restaurant = await restaurantService.findById(id);
       res.status(HttpStatus.OK).json(restaurant);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getByOwnerId(req: Request, res: Response, next: NextFunction) {
+    try {
+      const ownerId = req.user?.id as string;
+      const restaurants = await restaurantService.findByOwnerId(ownerId);
+      res.status(HttpStatus.OK).json(restaurants);
     } catch (error) {
       next(error);
     }

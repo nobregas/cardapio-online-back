@@ -15,7 +15,7 @@ export interface IDecodedToken {
 declare global {
   namespace Express {
     interface Request {
-      user: User;
+      user?: User;
     }
   }
 }

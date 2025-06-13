@@ -27,7 +27,6 @@ const authMiddleware = async (
 
   try {
     const payload = jwt.verify(token, JWT_SECRET) as IDecodedToken;
-
     if (!payload?.id) {
       return next(
         new UnauthorizedException(
@@ -47,14 +46,12 @@ const authMiddleware = async (
         )
       );
     }
-
     req.user = {
       id: user.id,
       name: user.name,
       email: user.email,
       role: user.role,
     };
-
     next();
   } catch (err) {
     if (err instanceof jwt.TokenExpiredError) {
@@ -65,7 +62,6 @@ const authMiddleware = async (
         )
       );
     }
-
     return next(
       new UnauthorizedException(
         ErrorMessage.MISSING_OR_INVALID_TOKEN,

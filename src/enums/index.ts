@@ -8,11 +8,18 @@ export enum ErrorCode {
   INVALID_LOGIN = 40050,
   INVALID_PHONE = 40060,
   INVALID_EMAIL = 40070,
+  MESSAGE_IS_REQUIRED = 40080,
   RESTAURANT_ALREADY_EXISTS = 40080,
+  CATEGORY_ALREADY_EXISTS = 40090,
   UNAUTHORIZED = 40100,
   MISSING_OR_INVALID_TOKEN = 40110,
+  INVALID_HISTORY_FORMAT = 40040,
   TOKEN_EXPIRED = 40120,
   RESTAURANT_NOT_FOUND = 40410,
+  CATEGORY_NOT_FOUND = 40420,
+  API_KEY_NOT_CONFIGURED = 50010,
+  AI_RESPONSE_ERROR = 50020,
+  INVALID_AI_RESPONSE = 50030,
 }
 
 export enum HttpStatus {
@@ -43,4 +50,11 @@ export enum ErrorMessage {
   UNAUTHORIZED = "Unauthorized",
   RESTAURANT_ALREADY_EXISTS = "Restaurant already exists",
   RESTAURANT_NOT_FOUND = "Restaurant not found",
+  API_KEY_NOT_CONFIGURED = "API key not configured",
+  AI_RESPONSE_ERROR = "AI response error",
+  INVALID_AI_RESPONSE = "Invalid AI response",
+  MESSAGE_IS_REQUIRED = "Message is required",
+  INVALID_HISTORY_FORMAT = "Invalid history format",
+  CATEGORY_ALREADY_EXISTS = "Category already exists",
+  CATEGORY_NOT_FOUND = "Category not found",
 }

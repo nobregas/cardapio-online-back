@@ -4,9 +4,10 @@ import { IRestaurant } from "./restaurant.model";
 export interface ICategory extends Document {
   name: string;
   description: string;
-  isActive: boolean;
   order: number;
+  image: string;
   restaurant: IRestaurant["_id"];
+  isActive: boolean;
 }
 
 const categorySchema = new Schema<ICategory>(
@@ -19,7 +20,12 @@ const categorySchema = new Schema<ICategory>(
     description: {
       type: String,
       trim: true,
-      required: [true, "A descrição da categoria é obrigatória."],
+      required: false,
+    },
+    image: {
+      type: String,
+      trim: true,
+      required: false,
     },
     isActive: {
       type: Boolean,

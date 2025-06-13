@@ -1,5 +1,8 @@
 import { CreateRestaurantDTO } from "../dtos/restaurant/CreateRestaurantDTO";
-import { UpdateRestaurantDTO } from "../dtos/restaurant/UpdateRestaurant.DTO";
+import {
+  UpdateRestaurantAddressDTO,
+  UpdateRestaurantDTO,
+} from "../dtos/restaurant/UpdateRestaurant.DTO";
 import { ErrorMessage, ErrorCode } from "../enums";
 import { BadRequest } from "../exceptions/BadRequest";
 import { NotFound } from "../exceptions/NotFound";
@@ -74,6 +77,26 @@ class RestaurantService {
     }
 
     return updateRestaurant;
+  }
+
+  async updateAddress(
+    id: string,
+    addressData: UpdateRestaurantAddressDTO
+  ): Promise<IRestaurant> {
+    const updatedRestaurant = await Restaurant.findByIdAndUpdate(
+      id,
+      { $set: { address: addressData } },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedRestaurant) {
+      throw new NotFound(
+        ErrorMessage.RESTAURANT_NOT_FOUND,
+        ErrorCode.RESTAURANT_NOT_FOUND
+      );
+    }
+
+    return updatedRestaurant;
   }
 
   async delete(id: string): Promise<void> {

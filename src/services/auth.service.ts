@@ -9,7 +9,7 @@ import { InternalException } from "../exceptions/InternalException";
 import jwtService from "./jwt.service";
 
 class AuthService {
-  async login(credentials: LoginDTO): Promise<string> {
+  async login(credentials: LoginDTO): Promise<{ token: string }> {
     const { email, password } = credentials;
 
     if (!email || !password) {
@@ -37,7 +37,7 @@ class AuthService {
 
     await user.save();
 
-    return token;
+    return { token: token };
   }
 
   async register(userData: RegisterDTO) {

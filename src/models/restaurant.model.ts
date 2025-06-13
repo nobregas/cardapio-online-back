@@ -5,7 +5,7 @@ export interface IRestaurant extends Document {
   cnpj?: string;
   logo?: string;
   email?: string;
-  address: {
+  address?: {
     street: string;
     city: string;
     state: string;
