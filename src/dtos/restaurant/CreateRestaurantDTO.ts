@@ -1,3 +1,5 @@
+import { PaymentSettingsDTO } from "./PaymentSettingsDTO";
+
 export interface CreateRestaurantDTO {
   name: string;
   cnpj: string;
@@ -6,6 +8,7 @@ export interface CreateRestaurantDTO {
   description: string;
   phone: string;
   address: CreateRestaurantAddressDTO;
+  paymentSettings: PaymentSettingsDTO;
 }
 
 export interface CreateRestaurantAddressDTO {

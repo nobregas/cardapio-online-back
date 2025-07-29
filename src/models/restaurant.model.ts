@@ -1,5 +1,31 @@
 import { Document, model, Schema } from "mongoose";
 
+export interface IPaymentSettings {
+  online: {
+    active: boolean;
+    methods: {
+      creditCard: boolean;
+      debitCard: boolean;
+      pix: boolean;
+    };
+  };
+  onDelivery: {
+    active: boolean;
+    methods: {
+      cash: boolean;
+      creditCard: boolean;
+      debitCard: boolean;
+      pix: boolean;
+    };
+    needsChange: boolean;
+  };
+  pixDetails: {
+    key: string;
+    keyHolderName: string;
+  };
+  additionalInstructions?: string;
+}
+
 export interface IRestaurant extends Document {
   name: string;
   cnpj?: string;
@@ -14,6 +40,7 @@ export interface IRestaurant extends Document {
   description: string;
   phone: string;
   ownerId: Schema.Types.ObjectId;
+  paymentSettings: IPaymentSettings;
 }
 
 const restaurantSchema = new Schema<IRestaurant>(
@@ -69,6 +96,61 @@ const restaurantSchema = new Schema<IRestaurant>(
       type: Schema.Types.ObjectId,
       ref: "User",
       required: [true, "O proprietário do restaurante é obrigatório."],
+    },
+    paymentSettings: {
+      online: {
+        active: { type: Boolean, default: false },
+        methods: {
+          creditCard: { type: Boolean, default: false },
+          debitCard: { type: Boolean, default: false },
+          pix: { type: Boolean, default: false },
+        },
+      },
+      onDelivery: {
+        active: { type: Boolean, default: false },
+        methods: {
+          cash: { type: Boolean, default: false },
+          creditCard: { type: Boolean, default: false },
+          debitCard: { type: Boolean, default: false },
+          pix: { type: Boolean, default: false },
+        },
+        needsChange: { type: Boolean, default: false },
+      },
+      pixDetails: {
+        key: {
+          type: String,
+          trim: true,
+          required: [
+            function (this: IRestaurant) {
+              const settings = this.paymentSettings;
+              if (!settings) return false;
+
+              const onlinePix = settings.online?.methods?.pix;
+              const deliveryPix = settings.onDelivery?.methods?.pix;
+
+              return onlinePix || deliveryPix;
+            },
+            "A Chave Pix é obrigatória se o pagamento via Pix estiver habilitado.",
+          ],
+        },
+        keyHolderName: {
+          type: String,
+          trim: true,
+          required: [
+            function (this: IRestaurant) {
+              const settings = this.paymentSettings;
+              if (!settings) return false;
+
+              const onlinePix = settings.online?.methods?.pix;
+              const deliveryPix = settings.onDelivery?.methods?.pix;
+
+              return onlinePix || deliveryPix;
+            },
+            "O nome do favorecido é obrigatório se o pagamento via Pix estiver habilitado.",
+          ],
+        },
+      },
+      additionalInstructions: { type: String, trim: true },
     },
   },
   {

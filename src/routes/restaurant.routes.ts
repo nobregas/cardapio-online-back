@@ -5,14 +5,15 @@ const restaurantRoutes = Router();
 
 restaurantRoutes.post("/create", errorHandler(RestaurantController.create));
 restaurantRoutes.get("/all", errorHandler(RestaurantController.getAll));
-restaurantRoutes.get(
-  "/owner/:ownerId",
-  errorHandler(RestaurantController.getByOwnerId)
-);
+restaurantRoutes.get("/owner", errorHandler(RestaurantController.getByOwnerId));
 restaurantRoutes.get("/:id", errorHandler(RestaurantController.getById));
 restaurantRoutes.patch(
   "/update/:id",
   errorHandler(RestaurantController.update)
+);
+restaurantRoutes.patch(
+  "/payment-settings",
+  errorHandler(RestaurantController.updatePaymentSettings)
 );
 restaurantRoutes.delete("/:id", errorHandler(RestaurantController.delete));
 

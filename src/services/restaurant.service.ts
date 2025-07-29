@@ -1,4 +1,5 @@
 import { CreateRestaurantDTO } from "../dtos/restaurant/CreateRestaurantDTO";
+import { UpdatePaymentSettingsDTO } from "../dtos/restaurant/PaymentSettingsDTO";
 import {
   UpdateRestaurantAddressDTO,
   UpdateRestaurantDTO,
@@ -86,6 +87,26 @@ class RestaurantService {
     const updatedRestaurant = await Restaurant.findByIdAndUpdate(
       id,
       { $set: { address: addressData } },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedRestaurant) {
+      throw new NotFound(
+        ErrorMessage.RESTAURANT_NOT_FOUND,
+        ErrorCode.RESTAURANT_NOT_FOUND
+      );
+    }
+
+    return updatedRestaurant;
+  }
+
+  async updatePaymentSettings(
+    paymentSettingsData: UpdatePaymentSettingsDTO,
+    ownerId: string
+  ): Promise<IRestaurant> {
+    const updatedRestaurant = await Restaurant.findOneAndUpdate(
+      { ownerId },
+      { $set: { paymentSettings: paymentSettingsData } },
       { new: true, runValidators: true }
     );
 

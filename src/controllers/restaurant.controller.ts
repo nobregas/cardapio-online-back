@@ -3,6 +3,7 @@ import { HttpStatus } from "../enums";
 import { CreateRestaurantDTO } from "../dtos/restaurant/CreateRestaurantDTO";
 import { UpdateRestaurantDTO } from "../dtos/restaurant/UpdateRestaurant.DTO";
 import restaurantService from "../services/restaurant.service";
+import { UpdatePaymentSettingsDTO } from "../dtos/restaurant/PaymentSettingsDTO";
 
 class RestaurantController {
   async create(req: Request, res: Response, next: NextFunction) {
@@ -53,6 +54,20 @@ class RestaurantController {
       const { id } = req.params;
       const updateData: UpdateRestaurantDTO = req.body;
       const updatedRestaurant = await restaurantService.update(id, updateData);
+      res.status(HttpStatus.OK).json(updatedRestaurant);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updatePaymentSettings(req: Request, res: Response, next: NextFunction) {
+    try {
+      const ownerId = req.user?.id as string;
+      const updateData: UpdatePaymentSettingsDTO = req.body;
+      const updatedRestaurant = await restaurantService.updatePaymentSettings(
+        updateData,
+        ownerId
+      );
       res.status(HttpStatus.OK).json(updatedRestaurant);
     } catch (error) {
       next(error);
