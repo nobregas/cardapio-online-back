@@ -1,173 +1,175 @@
+import type { RegisterDTO } from "../dtos/auth/RegisterDTO";
+import type { LoginDTO } from "../dtos/auth/LoginDTO";
+import type { JWTPayload } from "./jwt.service";
+
 import * as bcrypt from "bcryptjs";
-import { LoginDTO } from "../dtos/auth/LoginDTO";
 import { ErrorCode, ErrorMessage } from "../enums";
 import { BadRequest } from "../exceptions/BadRequest";
 import User from "../models/user.model";
-import { RegisterDTO } from "../dtos/auth/RegisterDTO";
 import { UserRole } from "../models/enums/roles";
 import { InternalException } from "../exceptions/InternalException";
 import jwtService from "./jwt.service";
 
 class AuthService {
-  async login(credentials: LoginDTO): Promise<{ token: string }> {
-    const { email, password } = credentials;
+	async login(credentials: LoginDTO): Promise<{ token: string }> {
+		const { email, password } = credentials;
 
-    if (!email || !password) {
-      throw new BadRequest(
-        ErrorMessage.VALIDATION_ERROR,
-        ErrorCode.VALIDATION_ERROR
-      );
-    }
+		if (!email || !password) {
+			throw new BadRequest(
+				ErrorMessage.VALIDATION_ERROR,
+				ErrorCode.VALIDATION_ERROR,
+			);
+		}
 
-    const user = await User.findOne({ email });
-    if (!user) {
-      throw new BadRequest(ErrorMessage.INVALID_LOGIN, ErrorCode.INVALID_LOGIN);
-    }
+		const user = await User.findOne({ email });
+		if (!user) {
+			throw new BadRequest(ErrorMessage.INVALID_LOGIN, ErrorCode.INVALID_LOGIN);
+		}
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      throw new BadRequest(ErrorMessage.INVALID_LOGIN, ErrorCode.INVALID_LOGIN);
-    }
+		const isPasswordValid = await bcrypt.compare(password, user.password);
+		if (!isPasswordValid) {
+			throw new BadRequest(ErrorMessage.INVALID_LOGIN, ErrorCode.INVALID_LOGIN);
+		}
 
-    const payload = { id: user._id };
-    const token = jwtService.generateToken(payload);
-    const refreshToken = jwtService.generateRefreshToken(payload);
+		const payload: JWTPayload = { id: user._id };
+		const token = jwtService.generateToken(payload);
+		const refreshToken = jwtService.generateRefreshToken(payload);
 
-    user.refreshToken = refreshToken;
+		user.refreshToken = refreshToken;
 
-    await user.save();
+		await user.save();
 
-    return { token: token };
-  }
+		return { token: token };
+	}
 
-  async register(userData: RegisterDTO) {
-    const { name, email, password, phone } = userData;
+	async register(userData: RegisterDTO) {
+		const { name, email, password, phone } = userData;
 
-    if (!name || !email || !password || !phone) {
-      throw new BadRequest(
-        ErrorMessage.VALIDATION_ERROR,
-        ErrorCode.VALIDATION_ERROR
-      );
-    }
+		if (!name || !email || !password || !phone) {
+			throw new BadRequest(
+				ErrorMessage.VALIDATION_ERROR,
+				ErrorCode.VALIDATION_ERROR,
+			);
+		}
 
-    if (password.length < 8) {
-      throw new BadRequest(
-        ErrorMessage.INVALID_PASSWORD,
-        ErrorCode.INVALID_PASSWORD
-      );
-    }
+		if (password.length < 8) {
+			throw new BadRequest(
+				ErrorMessage.INVALID_PASSWORD,
+				ErrorCode.INVALID_PASSWORD,
+			);
+		}
 
-    const phoneRegex = /^\d{2}9\d{8}$/;
-    if (!phoneRegex.test(phone)) {
-      throw new BadRequest(ErrorMessage.INVALID_PHONE, ErrorCode.INVALID_PHONE);
-    }
+		const phoneRegex = /^\d{2}9\d{8}$/;
+		if (!phoneRegex.test(phone)) {
+			throw new BadRequest(ErrorMessage.INVALID_PHONE, ErrorCode.INVALID_PHONE);
+		}
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      throw new BadRequest(
-        ErrorMessage.USER_ALREADY_EXISTS,
-        ErrorCode.USER_ALREADY_EXISTS
-      );
-    }
+		const existingUser = await User.findOne({ email });
+		if (existingUser) {
+			throw new BadRequest(
+				ErrorMessage.USER_ALREADY_EXISTS,
+				ErrorCode.USER_ALREADY_EXISTS,
+			);
+		}
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await User.create({
-      name: name,
-      email: email,
-      password: hashedPassword,
-      phone: phone,
-      role: UserRole.CUSTOMER,
-    });
+		const hashedPassword = await bcrypt.hash(password, 10);
+		const newUser = await User.create({
+			name: name,
+			email: email,
+			password: hashedPassword,
+			phone: phone,
+			role: UserRole.CUSTOMER,
+		});
 
-    const { password: _, ...userWithoutPassword } = newUser.toObject();
-    return userWithoutPassword;
-  }
+		const { password: _, ...userWithoutPassword } = newUser.toObject();
+		return userWithoutPassword;
+	}
 
-  async register_owner(userData: RegisterDTO) {
-    const { name, email, password, phone } = userData;
+	async register_owner(userData: RegisterDTO) {
+		const { name, email, password, phone } = userData;
 
-    if (!name || !email || !password || !phone) {
-      throw new BadRequest(
-        ErrorMessage.VALIDATION_ERROR,
-        ErrorCode.VALIDATION_ERROR
-      );
-    }
+		if (!name || !email || !password || !phone) {
+			throw new BadRequest(
+				ErrorMessage.VALIDATION_ERROR,
+				ErrorCode.VALIDATION_ERROR,
+			);
+		}
 
-    if (password.length < 8) {
-      throw new BadRequest(
-        ErrorMessage.INVALID_PASSWORD,
-        ErrorCode.INVALID_PASSWORD
-      );
-    }
+		if (password.length < 8) {
+			throw new BadRequest(
+				ErrorMessage.INVALID_PASSWORD,
+				ErrorCode.INVALID_PASSWORD,
+			);
+		}
 
-    const phoneRegex = /^\d{2}9\d{8}$/;
-    if (!phoneRegex.test(phone)) {
-      throw new BadRequest(ErrorMessage.INVALID_PHONE, ErrorCode.INVALID_PHONE);
-    }
+		const phoneRegex = /^\d{2}9\d{8}$/;
+		if (!phoneRegex.test(phone)) {
+			throw new BadRequest(ErrorMessage.INVALID_PHONE, ErrorCode.INVALID_PHONE);
+		}
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      throw new BadRequest(
-        ErrorMessage.USER_ALREADY_EXISTS,
-        ErrorCode.USER_ALREADY_EXISTS
-      );
-    }
+		const existingUser = await User.findOne({ email });
+		if (existingUser) {
+			throw new BadRequest(
+				ErrorMessage.USER_ALREADY_EXISTS,
+				ErrorCode.USER_ALREADY_EXISTS,
+			);
+		}
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await User.create({
-      name: name,
-      email: email,
-      password: hashedPassword,
-      phone: phone,
-      role: UserRole.OWNER,
-    });
+		const hashedPassword = await bcrypt.hash(password, 10);
+		const newUser = await User.create({
+			name: name,
+			email: email,
+			password: hashedPassword,
+			phone: phone,
+			role: UserRole.OWNER,
+		});
 
-    const token = await this.login({ email, password });
+		const token = await this.login({ email, password });
 
-    const { password: _, ...userWithoutPassword } = newUser.toObject();
-    return { ...userWithoutPassword, token };
-  }
+		const { password: _, ...userWithoutPassword } = newUser.toObject();
+		return { ...userWithoutPassword, token };
+	}
 
-  async logout(userID: string) {
-    try {
-      await User.findByIdAndUpdate(userID, { refreshToken: null });
-    } catch (error) {
-      throw new InternalException(
-        ErrorMessage.SOMETHING_WENT_WRONG,
-        ErrorCode.SOMETHING_WENT_WRONG
-      );
-    }
-  }
+	async logout(userID: string) {
+		try {
+			await User.findByIdAndUpdate(userID, { refreshToken: null });
+		} catch (_error) {
+			throw new InternalException(
+				ErrorMessage.SOMETHING_WENT_WRONG,
+				ErrorCode.SOMETHING_WENT_WRONG,
+			);
+		}
+	}
 
-  async resetPassword() {}
+	async resetPassword() { }
 
-  async refreshToken(userID: string) {
-    try {
-      const user = await User.findById(userID);
-      if (!user) {
-        throw new BadRequest(
-          ErrorMessage.USER_NOT_FOUND,
-          ErrorCode.USER_NOT_FOUND
-        );
-      }
+	async refreshToken(userID: string) {
+		try {
+			const user = await User.findById(userID);
+			if (!user) {
+				throw new BadRequest(
+					ErrorMessage.USER_NOT_FOUND,
+					ErrorCode.USER_NOT_FOUND,
+				);
+			}
 
-      const payload = { id: user._id };
+			const payload: JWTPayload = { id: user._id };
 
-      const token = jwtService.generateToken(payload);
-      const refreshToken = jwtService.generateRefreshToken(payload);
+			const token = jwtService.generateToken(payload);
+			const refreshToken = jwtService.generateRefreshToken(payload);
 
-      user.refreshToken = refreshToken;
+			user.refreshToken = refreshToken;
 
-      await user.save();
+			await user.save();
 
-      return token;
-    } catch (error) {
-      throw new InternalException(
-        ErrorMessage.SOMETHING_WENT_WRONG,
-        ErrorCode.SOMETHING_WENT_WRONG
-      );
-    }
-  }
+			return token;
+		} catch (_error) {
+			throw new InternalException(
+				ErrorMessage.SOMETHING_WENT_WRONG,
+				ErrorCode.SOMETHING_WENT_WRONG,
+			);
+		}
+	}
 }
 
 export default new AuthService();

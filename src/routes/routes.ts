@@ -14,17 +14,17 @@ const router = Router();
 router.use("/auth", ratelimiter(ATTEMPTS, BLOCK_TIME), authRoutes);
 
 router.use(
-  "/restaurant",
-  authMiddleware,
-  ratelimiter(ATTEMPTS, BLOCK_TIME),
-  restaurantRoutes
+	"/restaurant",
+	authMiddleware,
+	ratelimiter(ATTEMPTS, BLOCK_TIME),
+	restaurantRoutes,
 );
 
 router.use(
-  "/category",
-  authMiddleware,
-  ratelimiter(ATTEMPTS, BLOCK_TIME),
-  categoryRoutes
+	"/category",
+	authMiddleware,
+	ratelimiter(ATTEMPTS, BLOCK_TIME),
+	categoryRoutes,
 );
 
 router.use("/ai", authMiddleware, aiRoutes);

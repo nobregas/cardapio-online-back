@@ -9,9 +9,9 @@ const BLOCK_TIME = 10 * 60 * 1000;
 const aiRoutes = Router();
 
 aiRoutes.post(
-  "/generate",
-  ratelimiter(ATTEMPTS, BLOCK_TIME),
-  errorHandler(AiController.generate)
+	"/generate",
+	ratelimiter(ATTEMPTS, BLOCK_TIME),
+	errorHandler(AiController.generate),
 );
 
 export default aiRoutes;

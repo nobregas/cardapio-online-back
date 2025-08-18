@@ -1,4 +1,4 @@
-import express, { Application, Request, Response } from "express";
+import express, { type Application, type Request, type Response } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import router from "./routes/routes";
@@ -14,8 +14,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api", router);
 app.use(errorMiddleware);
 
-app.get("/", (req: Request, res: Response) => {
-  res.json({ message: "Application is healthy" });
+app.get("/", (_req: Request, res: Response) => {
+	res.json({ message: "Application is healthy" });
 });
 
 export default app;
