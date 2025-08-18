@@ -6,8 +6,8 @@ import authMiddleware from "../middleware/authMIddleware";
 import aiRoutes from "./ai.routes";
 import categoryRoutes from "./caterogy.routes";
 
-const ATTEMPTS = 9999;
-const BLOCK_TIME = 10 * 60 * 1000;
+const ATTEMPTS = Number(process.env.RATE_LIMIT_ATTEMPTS) || 5;
+const BLOCK_TIME = Number(process.env.RATE_LIMIT_BLOCK_TIME) || 10 * 60 * 1000; // Default to 10 minutes
 
 const router = Router();
 
@@ -27,6 +27,6 @@ router.use(
 	categoryRoutes,
 );
 
-router.use("/ai", authMiddleware, aiRoutes);
+router.use("/ai", authMiddleware, ratelimiter(ATTEMPTS, BLOCK_TIME), aiRoutes);
 
 export default router;
