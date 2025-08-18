@@ -10,7 +10,7 @@ import { ErrorMessage, ErrorCode } from "../enums";
 import { BadRequest } from "../exceptions/BadRequest";
 import { NotFound } from "../exceptions/NotFound";
 import Restaurant from "../models/restaurant.model";
-import { createRestaurantSchema, updateAddressSchema, updatePaymentSettingsSchema, updateRestaurantSchema } from "../schemas/auth/restaurant.schema";
+import { createRestaurantSchema, updateAddressSchema, updatePaymentSettingsSchema, updateRestaurantSchema } from "../schemas/restaurant/restaurant.schema";
 
 class RestaurantService {
 	async create(
