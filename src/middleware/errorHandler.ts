@@ -7,6 +7,7 @@ import {
 	InternalException,
 	ValidationException,
 } from "../exceptions/InternalException";
+import { ZodError } from "zod";
 
 const errorHandler = (method: (req: Request, res: Response, next: NextFunction) => Promise<void> | void) => {
 	return async (req: Request, res: Response, next: NextFunction) => {
@@ -21,6 +22,18 @@ const errorHandler = (method: (req: Request, res: Response, next: NextFunction) 
 					ErrorCode.VALIDATION_ERROR,
 					err.errors,
 				);
+			} else if (err instanceof ZodError) {
+				const errors = err.issues.map(error => ({
+					field: error.path.join('.'),
+					message: error.message,
+				}))
+
+				exception = new ValidationException(
+					err.message,
+					ErrorCode.VALIDATION_ERROR,
+					errors,
+				)
+
 			} else if (err instanceof HttpException) {
 				exception = err;
 			} else {
