@@ -14,11 +14,7 @@ class JwtService {
 			algorithm: "HS256",
 		};
 
-		const token = this.generateJwtToken(
-			payload,
-			JWT_SECRET,
-			signOptions
-		);
+		const token = this.generateJwtToken(payload, JWT_SECRET, signOptions);
 
 		return `Bearer ${token}`;
 	}
@@ -38,7 +34,11 @@ class JwtService {
 		return `Bearer ${token}`;
 	}
 
-	private generateJwtToken(payload: JWTPayload, secret: string, options: SignOptions): string {
+	private generateJwtToken(
+		payload: JWTPayload,
+		secret: string,
+		options: SignOptions,
+	): string {
 		return jwt.sign(payload, secret, options);
 	}
 }

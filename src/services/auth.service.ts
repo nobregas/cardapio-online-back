@@ -20,7 +20,10 @@ class AuthService {
 			throw new BadRequest(ErrorMessage.INVALID_LOGIN, ErrorCode.INVALID_LOGIN);
 		}
 
-		const isPasswordValid = await bcrypt.compare(validatedCredentials.password, user.password);
+		const isPasswordValid = await bcrypt.compare(
+			validatedCredentials.password,
+			user.password,
+		);
 		if (!isPasswordValid) {
 			throw new BadRequest(ErrorMessage.INVALID_LOGIN, ErrorCode.INVALID_LOGIN);
 		}
@@ -82,7 +85,7 @@ class AuthService {
 
 		const token = await this.login({
 			email: userValidatedData.email,
-			password: userValidatedData.password
+			password: userValidatedData.password,
 		});
 
 		const { password: _, ...userWithoutPassword } = newUser.toObject();
@@ -100,7 +103,7 @@ class AuthService {
 		}
 	}
 
-	async resetPassword() { }
+	async resetPassword() {}
 
 	async refreshToken(userID: string) {
 		try {

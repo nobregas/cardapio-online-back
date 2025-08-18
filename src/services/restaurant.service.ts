@@ -10,18 +10,26 @@ import { ErrorMessage, ErrorCode } from "../enums";
 import { BadRequest } from "../exceptions/BadRequest";
 import { NotFound } from "../exceptions/NotFound";
 import Restaurant from "../models/restaurant.model";
-import { createRestaurantSchema, updateAddressSchema, updatePaymentSettingsSchema, updateRestaurantSchema } from "../schemas/restaurant/restaurant.schema";
+import {
+	createRestaurantSchema,
+	updateAddressSchema,
+	updatePaymentSettingsSchema,
+	updateRestaurantSchema,
+} from "../schemas/restaurant/restaurant.schema";
 
 class RestaurantService {
 	async create(
 		restaurantData: CreateRestaurantDTO,
 		ownerId: string,
 	): Promise<IRestaurant> {
-		const validatedRestaurantData = createRestaurantSchema.parse(restaurantData);
+		const validatedRestaurantData =
+			createRestaurantSchema.parse(restaurantData);
 
 		const existingRestaurant = await Restaurant.findOne({
-			$or: [{ cnpj: validatedRestaurantData.cnpj },
-			{ email: validatedRestaurantData.email }],
+			$or: [
+				{ cnpj: validatedRestaurantData.cnpj },
+				{ email: validatedRestaurantData.email },
+			],
 		});
 
 		if (existingRestaurant) {
@@ -69,7 +77,8 @@ class RestaurantService {
 		id: string,
 		restaurantData: UpdateRestaurantDTO,
 	): Promise<IRestaurant> {
-		const validatedRestaurantData = updateRestaurantSchema.parse(restaurantData);
+		const validatedRestaurantData =
+			updateRestaurantSchema.parse(restaurantData);
 
 		const updateRestaurant = await Restaurant.findByIdAndUpdate(
 			id,
@@ -112,7 +121,8 @@ class RestaurantService {
 		paymentSettingsData: UpdatePaymentSettingsDTO,
 		ownerId: string,
 	): Promise<IRestaurant> {
-		const validatedPaymentdata = updatePaymentSettingsSchema.parse(paymentSettingsData);
+		const validatedPaymentdata =
+			updatePaymentSettingsSchema.parse(paymentSettingsData);
 
 		const updatedRestaurant = await Restaurant.findOneAndUpdate(
 			{ ownerId },

@@ -21,7 +21,7 @@ class RestaurantController {
 		}
 	}
 
-	async getAll(req: Request, res: Response, next: NextFunction) {
+	async getAll(_req: Request, res: Response, next: NextFunction) {
 		try {
 			const restaurants = await restaurantService.findAll();
 			res.status(HttpStatus.OK).json(restaurants);

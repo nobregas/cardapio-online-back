@@ -1,4 +1,8 @@
-import express, { type Application, type Request, type Response } from "express";
+import express, {
+	type Application,
+	type Request,
+	type Response,
+} from "express";
 import cors from "cors";
 import helmet from "helmet";
 import router from "./routes/routes";

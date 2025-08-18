@@ -9,7 +9,13 @@ import {
 } from "../exceptions/InternalException";
 import { ZodError } from "zod";
 
-const errorHandler = (method: (req: Request, res: Response, next: NextFunction) => Promise<void> | void) => {
+const errorHandler = (
+	method: (
+		req: Request,
+		res: Response,
+		next: NextFunction,
+	) => Promise<void> | void,
+) => {
 	return async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			await method(req, res, next);
@@ -23,17 +29,16 @@ const errorHandler = (method: (req: Request, res: Response, next: NextFunction) 
 					err.errors,
 				);
 			} else if (err instanceof ZodError) {
-				const errors = err.issues.map(error => ({
-					field: error.path.join('.'),
+				const errors = err.issues.map((error) => ({
+					field: error.path.join("."),
 					message: error.message,
-				}))
+				}));
 
 				exception = new ValidationException(
 					err.message,
 					ErrorCode.VALIDATION_ERROR,
 					errors,
-				)
-
+				);
 			} else if (err instanceof HttpException) {
 				exception = err;
 			} else {
