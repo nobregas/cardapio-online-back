@@ -10,15 +10,18 @@ import { ErrorMessage, ErrorCode } from "../enums";
 import { BadRequest } from "../exceptions/BadRequest";
 import { NotFound } from "../exceptions/NotFound";
 import Restaurant from "../models/restaurant.model";
+import { createRestaurantSchema, updateAddressSchema, updatePaymentSettingsSchema, updateRestaurantSchema } from "../schemas/auth/restaurant.schema";
 
 class RestaurantService {
 	async create(
 		restaurantData: CreateRestaurantDTO,
 		ownerId: string,
 	): Promise<IRestaurant> {
-		const { cnpj, email } = restaurantData;
+		const validatedRestaurantData = createRestaurantSchema.parse(restaurantData);
+
 		const existingRestaurant = await Restaurant.findOne({
-			$or: [{ cnpj }, { email }],
+			$or: [{ cnpj: validatedRestaurantData.cnpj },
+			{ email: validatedRestaurantData.email }],
 		});
 
 		if (existingRestaurant) {
@@ -28,7 +31,7 @@ class RestaurantService {
 			);
 		}
 
-		const dataWithOwner = { ...restaurantData, ownerId };
+		const dataWithOwner = { ...validatedRestaurantData, ownerId };
 		const restaurant = await Restaurant.create(dataWithOwner);
 		return restaurant;
 	}
@@ -66,9 +69,11 @@ class RestaurantService {
 		id: string,
 		restaurantData: UpdateRestaurantDTO,
 	): Promise<IRestaurant> {
+		const validatedRestaurantData = updateRestaurantSchema.parse(restaurantData);
+
 		const updateRestaurant = await Restaurant.findByIdAndUpdate(
 			id,
-			restaurantData,
+			validatedRestaurantData,
 			{ new: true, runValidators: true },
 		);
 		if (!updateRestaurant) {
@@ -85,9 +90,11 @@ class RestaurantService {
 		id: string,
 		addressData: UpdateRestaurantAddressDTO,
 	): Promise<IRestaurant> {
+		const validatedAddressData = updateAddressSchema.parse(addressData);
+
 		const updatedRestaurant = await Restaurant.findByIdAndUpdate(
 			id,
-			{ $set: { address: addressData } },
+			{ $set: { address: validatedAddressData } },
 			{ new: true, runValidators: true },
 		);
 
@@ -105,9 +112,11 @@ class RestaurantService {
 		paymentSettingsData: UpdatePaymentSettingsDTO,
 		ownerId: string,
 	): Promise<IRestaurant> {
+		const validatedPaymentdata = updatePaymentSettingsSchema.parse(paymentSettingsData);
+
 		const updatedRestaurant = await Restaurant.findOneAndUpdate(
 			{ ownerId },
-			{ $set: { paymentSettings: paymentSettingsData } },
+			{ $set: { paymentSettings: validatedPaymentdata } },
 			{ new: true, runValidators: true },
 		);
 
