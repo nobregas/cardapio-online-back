@@ -5,6 +5,10 @@ import { ErrorCode, ErrorMessage } from "../enums";
 import { BadRequest } from "../exceptions/BadRequest";
 import { NotFound } from "../exceptions/NotFound";
 import Category, { type ICategory } from "../models/category.model";
+import {
+	createCategorySchema,
+	updateCategorySchema,
+} from "../schemas/category/category.schema";
 import restaurantService from "./restaurant.service";
 
 class CategoryService {
@@ -12,11 +16,12 @@ class CategoryService {
 		createCategoryDTO: CreateCategoryDTO,
 		userId: string,
 	): Promise<ICategory> {
-		const { name } = createCategoryDTO;
+		const validatedCategoryData = createCategorySchema.parse(createCategoryDTO);
+
 		const restaurant = await restaurantService.findByOwnerId(userId);
 
 		const existingCategory = await Category.findOne({
-			name,
+			name: validatedCategoryData.name,
 			restaurant: restaurant._id,
 		});
 		if (existingCategory) {
@@ -27,7 +32,7 @@ class CategoryService {
 		}
 
 		const categoryToCreate = {
-			...createCategoryDTO,
+			...validatedCategoryData,
 			restaurant: restaurant._id,
 		};
 		const newCategory = await Category.create(categoryToCreate);
@@ -61,11 +66,12 @@ class CategoryService {
 		userId: string,
 		categoryData: UpdateCategoryDTO,
 	): Promise<ICategory> {
+		const validatedCategoryData = updateCategorySchema.parse(categoryData);
 		const restaurant = await restaurantService.findByOwnerId(userId);
 
-		if (categoryData.name) {
+		if (validatedCategoryData.name) {
 			const existingCategory = await Category.findOne({
-				name: categoryData.name,
+				name: validatedCategoryData.name,
 				restaurant: restaurant._id,
 				_id: { $ne: id },
 			});
@@ -79,7 +85,7 @@ class CategoryService {
 
 		const updatedCategory = await Category.findOneAndUpdate(
 			{ _id: id, restaurant: restaurant._id },
-			categoryData,
+			validatedCategoryData,
 			{
 				new: true,
 				runValidators: true,
