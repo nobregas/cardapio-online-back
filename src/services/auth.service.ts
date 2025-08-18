@@ -9,24 +9,18 @@ import User from "../models/user.model";
 import { UserRole } from "../models/enums/roles";
 import { InternalException } from "../exceptions/InternalException";
 import jwtService from "./jwt.service";
+import { loginSchema, registerSchema } from "../schemas/auth/auth.schema";
 
 class AuthService {
 	async login(credentials: LoginDTO): Promise<{ token: string }> {
-		const { email, password } = credentials;
+		const validatedCredentials = loginSchema.parse(credentials);
 
-		if (!email || !password) {
-			throw new BadRequest(
-				ErrorMessage.VALIDATION_ERROR,
-				ErrorCode.VALIDATION_ERROR,
-			);
-		}
-
-		const user = await User.findOne({ email });
+		const user = await User.findOne({ email: validatedCredentials.email });
 		if (!user) {
 			throw new BadRequest(ErrorMessage.INVALID_LOGIN, ErrorCode.INVALID_LOGIN);
 		}
 
-		const isPasswordValid = await bcrypt.compare(password, user.password);
+		const isPasswordValid = await bcrypt.compare(validatedCredentials.password, user.password);
 		if (!isPasswordValid) {
 			throw new BadRequest(ErrorMessage.INVALID_LOGIN, ErrorCode.INVALID_LOGIN);
 		}
@@ -43,28 +37,9 @@ class AuthService {
 	}
 
 	async register(userData: RegisterDTO) {
-		const { name, email, password, phone } = userData;
+		const userValidatedData = registerSchema.parse(userData);
 
-		if (!name || !email || !password || !phone) {
-			throw new BadRequest(
-				ErrorMessage.VALIDATION_ERROR,
-				ErrorCode.VALIDATION_ERROR,
-			);
-		}
-
-		if (password.length < 8) {
-			throw new BadRequest(
-				ErrorMessage.INVALID_PASSWORD,
-				ErrorCode.INVALID_PASSWORD,
-			);
-		}
-
-		const phoneRegex = /^\d{2}9\d{8}$/;
-		if (!phoneRegex.test(phone)) {
-			throw new BadRequest(ErrorMessage.INVALID_PHONE, ErrorCode.INVALID_PHONE);
-		}
-
-		const existingUser = await User.findOne({ email });
+		const existingUser = await User.findOne({ email: userValidatedData.email });
 		if (existingUser) {
 			throw new BadRequest(
 				ErrorMessage.USER_ALREADY_EXISTS,
@@ -72,12 +47,12 @@ class AuthService {
 			);
 		}
 
-		const hashedPassword = await bcrypt.hash(password, 10);
+		const hashedPassword = await bcrypt.hash(userValidatedData.password, 10);
 		const newUser = await User.create({
-			name: name,
-			email: email,
+			name: userValidatedData.name,
+			email: userValidatedData.email,
 			password: hashedPassword,
-			phone: phone,
+			phone: userValidatedData.phone,
 			role: UserRole.CUSTOMER,
 		});
 
@@ -86,28 +61,9 @@ class AuthService {
 	}
 
 	async register_owner(userData: RegisterDTO) {
-		const { name, email, password, phone } = userData;
+		const userValidatedData = registerSchema.parse(userData);
 
-		if (!name || !email || !password || !phone) {
-			throw new BadRequest(
-				ErrorMessage.VALIDATION_ERROR,
-				ErrorCode.VALIDATION_ERROR,
-			);
-		}
-
-		if (password.length < 8) {
-			throw new BadRequest(
-				ErrorMessage.INVALID_PASSWORD,
-				ErrorCode.INVALID_PASSWORD,
-			);
-		}
-
-		const phoneRegex = /^\d{2}9\d{8}$/;
-		if (!phoneRegex.test(phone)) {
-			throw new BadRequest(ErrorMessage.INVALID_PHONE, ErrorCode.INVALID_PHONE);
-		}
-
-		const existingUser = await User.findOne({ email });
+		const existingUser = await User.findOne({ email: userValidatedData.email });
 		if (existingUser) {
 			throw new BadRequest(
 				ErrorMessage.USER_ALREADY_EXISTS,
@@ -115,16 +71,19 @@ class AuthService {
 			);
 		}
 
-		const hashedPassword = await bcrypt.hash(password, 10);
+		const hashedPassword = await bcrypt.hash(userValidatedData.password, 10);
 		const newUser = await User.create({
-			name: name,
-			email: email,
+			name: userValidatedData.name,
+			email: userValidatedData.email,
 			password: hashedPassword,
-			phone: phone,
+			phone: userValidatedData.phone,
 			role: UserRole.OWNER,
 		});
 
-		const token = await this.login({ email, password });
+		const token = await this.login({
+			email: userValidatedData.email,
+			password: userValidatedData.password
+		});
 
 		const { password: _, ...userWithoutPassword } = newUser.toObject();
 		return { ...userWithoutPassword, token };
