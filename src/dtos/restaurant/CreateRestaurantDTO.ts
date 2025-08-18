@@ -1,4 +1,4 @@
-import { PaymentSettingsDTO } from "./PaymentSettingsDTO";
+import type { PaymentSettingsDTO } from "./PaymentSettingsDTO";
 
 export interface CreateRestaurantDTO {
 	name: string;
