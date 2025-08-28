@@ -2,6 +2,7 @@ import {
 	type ChatSession,
 	type Content,
 	GoogleGenerativeAI,
+	GoogleGenerativeAIResponseError,
 	HarmBlockThreshold,
 	HarmCategory,
 } from "@google/generative-ai";
@@ -13,6 +14,25 @@ export interface ChatHistory {
 	role: "user" | "model";
 	parts: { text: string }[];
 }
+
+const SAFETY_SETTINGS = [
+	{
+		category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+		threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+	},
+	{
+		category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+		threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+	},
+	{
+		category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+		threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+	},
+	{
+		category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+		threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+	},
+];
 
 class AiService {
 	private readonly genAI: GoogleGenerativeAI;
@@ -36,24 +56,7 @@ class AiService {
 			const generativeModel = this.genAI.getGenerativeModel({
 				model: this.model,
 				systemInstruction: systemPrompt,
-				safetySettings: [
-					{
-						category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-						threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-					},
-					{
-						category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-						threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-					},
-					{
-						category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-						threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-					},
-					{
-						category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-						threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-					},
-				],
+				safetySettings: SAFETY_SETTINGS,
 			});
 
 			const chat: ChatSession = generativeModel.startChat({
@@ -65,7 +68,7 @@ class AiService {
 
 			const text = response.text();
 			if (!text) {
-				console.error("----------API ERROR----------", response);
+				console.error("----------API ERROR: Empty response----------", response);
 				throw new InternalException(
 					ErrorMessage.AI_RESPONSE_ERROR,
 					ErrorCode.AI_RESPONSE_ERROR,
@@ -74,6 +77,13 @@ class AiService {
 			return text.trim();
 		} catch (error) {
 			console.error("Erro ao interagir com o chat do Gemini:", error);
+			if (error instanceof GoogleGenerativeAIResponseError) {
+				console.error("----------API RESPONSE ERROR----------", error.response);
+				throw new InternalException(
+					ErrorMessage.AI_RESPONSE_ERROR,
+					ErrorCode.AI_RESPONSE_ERROR,
+				);
+			}
 			throw error;
 		}
 	}
